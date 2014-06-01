@@ -4,5 +4,6 @@
     <string name="app_name">CmsSample</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="welcome_message">ようこそ「%1$s」さん！</string>
 
 </resources>
