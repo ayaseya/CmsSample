@@ -1,6 +1,8 @@
 package com.example.cmssample;
 
-public class MemberInformation {
+import java.io.Serializable;
+
+public class MemberInformation implements Serializable{
 	// 一人分の会員情報を管理するクラスです。
 
 	private String _id = "";

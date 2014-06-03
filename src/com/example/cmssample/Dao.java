@@ -87,7 +87,13 @@ public class Dao {
 
 	public MemberInformation findById(String _id) {
 
-		Cursor cursor = db.query(TABLE_NAME, COLUMNS, "_id like ? ", new String[]{_id}, null, null, null,null);
+		//		Cursor cursor = db.query(TABLE_NAME, COLUMNS, "_id like ? ", new String[]{_id}, null, null, null,null);
+
+		String sql = "select * from member where _id ='" + _id + "';";
+
+		// 第一引数SQL文、第二引数はSQL文内に埋め込まれた「?」にはめ込むString配列です。
+		//
+		Cursor cursor = db.rawQuery(sql, null);
 
 		while (cursor.moveToNext()) {
 			MemberInformation member = new MemberInformation();
@@ -99,11 +105,11 @@ public class Dao {
 			member.setDate(cursor.getString(5));
 			member.setPassword(cursor.getString(6));
 
-			Log.v("CMS", "ID:"+_id+"の会員情報を返します。");
+			Log.v("CMS", "ID:" + _id + "の会員情報を返します。");
 
 			return member;
 		}
-		Log.v("CMS", "ID:"+_id+"は存在しません。");
+		Log.v("CMS", "ID:" + _id + "は存在しません。");
 		return null;
 	}
 

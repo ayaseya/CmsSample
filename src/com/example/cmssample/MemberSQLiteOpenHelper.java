@@ -20,6 +20,20 @@ public class MemberSQLiteOpenHelper extends SQLiteOpenHelper {
 					+ COLUMN_TEL + " text(13),"
 					+ COLUMN_DATE + " text,"
 					+ COLUMN_PASSWORD + " text(5))";
+	/**
+	 * SQL
+	 * create tgable member (
+	 * _id text(5) primary key,
+	 * name text(20),
+	 * kana text(20),
+	 * address text(60),
+	 * tel text(13)
+	 * date text
+	 * password text(5));
+	 *
+	 */
+
+
 
 	static final String DROP_TABLE = "drop table " + TABLE_NAME + ";";
 
