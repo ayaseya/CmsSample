@@ -183,6 +183,7 @@ public class CmsLoginActivity extends Activity {
 			TextView passwordTV = (TextView) rootView.findViewById(R.id.passwordTV);
 			passwordTV.setText(member.getPassword());
 
+
 			return rootView;
 		}
 	}
