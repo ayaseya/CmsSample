@@ -1,6 +1,7 @@
 package com.example.cmssample;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,6 +22,7 @@ public class CmsLoginActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.v("CMS", "-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-");
 		setContentView(R.layout.activity_cms_login);
 
 		if (savedInstanceState == null) {
@@ -144,6 +147,12 @@ public class CmsLoginActivity extends Activity {
 
 	public static class MemberFragment extends Fragment {
 
+		private AlertDialog dialog;
+		private View dialogView;
+		private MemberInformation member;
+		private TextView nameTV;
+		private TextView welcomeTV;
+
 		public MemberFragment() {
 		}
 
@@ -155,17 +164,17 @@ public class CmsLoginActivity extends Activity {
 			Log.v("CMS", "MemberFragment");
 
 			// フラグメントに添付されたデータを取り出します。
-			MemberInformation member = (MemberInformation) getArguments().getSerializable("MEMBER");
+			member = (MemberInformation) getArguments().getSerializable("MEMBER");
 
 			// 各TextViewに会員情報を設定し画面に表示します。
-			TextView welcomeTV = (TextView) rootView.findViewById(R.id.welcomeTV);
+			welcomeTV = (TextView) rootView.findViewById(R.id.welcomeTV);
 			String welcomeMsg = getString(R.string.welcome_message, member.getName());
 			welcomeTV.setText(welcomeMsg);
 
 			TextView memberTV = (TextView) rootView.findViewById(R.id.memberTV);
 			memberTV.setText(member.get_id());
 
-			TextView nameTV = (TextView) rootView.findViewById(R.id.nameTV);
+			nameTV = (TextView) rootView.findViewById(R.id.nameTV);
 			nameTV.setText(member.getName());
 
 			TextView kanaTV = (TextView) rootView.findViewById(R.id.kanaTV);
@@ -183,6 +192,76 @@ public class CmsLoginActivity extends Activity {
 			TextView passwordTV = (TextView) rootView.findViewById(R.id.passwordTV);
 			passwordTV.setText(member.getPassword());
 
+			// 編集用ダイアログを表示します。
+			// レイアウトのxmlファイルからビューを生成します。
+			dialogView = inflater.inflate(R.layout.edit_dialog_layout, (ViewGroup) rootView.findViewById(R.id.dialog));
+
+			// ダイアログのインスタンスを生成します。
+			dialog = new AlertDialog.Builder(getActivity())
+					.setView(dialogView)
+					.setCancelable(false)
+					.create();
+
+			// ダイアログ上のUpdateボタンとCancelボタンのリスナーを設定します。
+			((Button) dialogView.findViewById(R.id.updateBtn)).setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+
+					String name = ((EditText) dialogView.findViewById(R.id.editTV)).getText().toString();
+					member.setName(name);
+
+					//					Log.v("CMS", member.get_id() + "|"
+					//							+ member.getName() + "|"
+					//							+ member.getKana() + "|"
+					//							+ member.getAddress() + "|"
+					//							+ member.getTel() + "|"
+					//							+ member.getDate() + "|"
+					//							+ member.getPassword());
+					//
+					//					Log.v("CMS", "name=" + name);
+
+					// SQLiteHelperのコンストラクターを呼び出します。
+					MemberSQLiteOpenHelper dbHelper = new MemberSQLiteOpenHelper(getActivity());
+					SQLiteDatabase db = dbHelper.getWritableDatabase();
+					// Daoクラスのコンストラクターを呼び出します。
+					Dao dao = new Dao(db);
+
+					dao.update(member);
+
+					db.close();
+
+					// TextViewを更新します。
+					String welcomeMsg = getString(R.string.welcome_message, name);
+					welcomeTV.setText(welcomeMsg);
+
+					nameTV.setText(name);
+
+					dialog.dismiss();// ダイアログを消去します。
+
+				}
+			});
+
+			((Button) dialogView.findViewById(R.id.cancelBtn)).setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					dialog.dismiss();// ダイアログを消去します。
+				}
+			});
+
+			// 名前などをクリックした時のリスナーを設定します。
+			nameTV.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+
+					// 現在のカラムの値をEditTextに表示させます。
+					((EditText) dialogView.findViewById(R.id.editTV)).setText(member.getName());
+					dialog.show();// 編集用のダイアログを表示します。
+
+				}
+			});
 
 			return rootView;
 		}

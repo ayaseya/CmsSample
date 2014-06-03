@@ -62,7 +62,7 @@ public class Dao {
 		values.put(COLUMN_DATE, member.getDate());
 		values.put(COLUMN_PASSWORD, member.getPassword());
 
-		String whereClause = "_id = " + member.get_id();// 更新条件に_idを設定します。
+		String whereClause = "_id = '" + member.get_id() + "'";// 更新条件に_idを設定します。
 		return db.update(TABLE_NAME, values, whereClause, null);
 	}
 
@@ -113,7 +113,7 @@ public class Dao {
 	}
 
 	public int delete(String _id) {
-		return db.delete(TABLE_NAME, " _id = " + _id, null);
+		return db.delete(TABLE_NAME, " _id = '" + _id + "'", null);
 	}
 
 }
