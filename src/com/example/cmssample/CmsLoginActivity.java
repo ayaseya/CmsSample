@@ -13,6 +13,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class CmsLoginActivity extends Activity {
 
@@ -60,7 +61,7 @@ public class CmsLoginActivity extends Activity {
 	 */
 	public static class PlaceholderFragment extends Fragment {
 
-		private String id = "00001";// 会員NO
+		private String id;// 会員NO
 		private EditText memberET;
 		private String password;// パスワード
 		private EditText passwordET;
@@ -97,27 +98,36 @@ public class CmsLoginActivity extends Activity {
 
 					db.close();
 
-					Log.v("CMS", member.get_id() + "|"
-							+ member.getName() + "|"
-							+ member.getKana() + "|"
-							+ member.getAddress() + "|"
-							+ member.getTel() + "|"
-							+ member.getDate() + "|"
-							+ member.getPassword());
+					if (member == null) {
+						Toast.makeText(getActivity(), "ID:" + id + "は存在しません", Toast.LENGTH_LONG).show();
+					} else {
 
-//					Toast.makeText(getActivity(), id, Toast.LENGTH_LONG).show();
+						Log.v("CMS", member.get_id() + "|"
+								+ member.getName() + "|"
+								+ member.getKana() + "|"
+								+ member.getAddress() + "|"
+								+ member.getTel() + "|"
+								+ member.getDate() + "|"
+								+ member.getPassword());
 
-					Bundle bundle = new Bundle();
-					bundle.putSerializable("MEMBER", member);
+						if (member.getPassword().equals(password)) {
 
-					MemberFragment memberFragment = new MemberFragment();
-					memberFragment.setArguments(bundle);
+							Bundle bundle = new Bundle();// フラグメントにデータを添付するためBundleクラスのインスタンスを取得します。
+							bundle.putSerializable("MEMBER", member);// 取得した情報をMemberInformationクラスの形で添付します。
 
-					getFragmentManager().beginTransaction()
-							.replace(R.id.container, memberFragment)
-							.addToBackStack(null)// バックキーを押下すると一つ前のフラグメントに戻ります。
-							.commit();
+							MemberFragment memberFragment = new MemberFragment();
+							memberFragment.setArguments(bundle);// フラグメントにデータを添付します。
 
+							getFragmentManager().beginTransaction()
+									.replace(R.id.container, memberFragment)
+									.addToBackStack(null)// バックキーを押下すると一つ前のフラグメントに戻ります。
+									.commit();
+
+						} else {
+							Toast.makeText(getActivity(), "パスワードが一致しません", Toast.LENGTH_LONG).show();
+						}
+
+					}
 				}
 			});
 
@@ -144,16 +154,10 @@ public class CmsLoginActivity extends Activity {
 					container, false);
 			Log.v("CMS", "MemberFragment");
 
+			// フラグメントに添付されたデータを取り出します。
 			MemberInformation member = (MemberInformation) getArguments().getSerializable("MEMBER");
 
-			Log.v("CMS", member.get_id() + "|"
-					+ member.getName() + "|"
-					+ member.getKana() + "|"
-					+ member.getAddress() + "|"
-					+ member.getTel() + "|"
-					+ member.getDate() + "|"
-					+ member.getPassword());
-
+			// 各TextViewに会員情報を設定し画面に表示します。
 			TextView welcomeTV = (TextView) rootView.findViewById(R.id.welcomeTV);
 			String welcomeMsg = getString(R.string.welcome_message, member.getName());
 			welcomeTV.setText(welcomeMsg);

@@ -109,7 +109,6 @@ public class Dao {
 
 			return member;
 		}
-		Log.v("CMS", "ID:" + _id + "は存在しません。");
 		return null;
 	}
 
