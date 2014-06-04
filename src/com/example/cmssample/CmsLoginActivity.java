@@ -56,10 +56,8 @@ public class CmsLoginActivity extends Activity {
 			return true;
 		} else if (id == R.id.action_db) {
 
-
 			return true;
 		} else if (id == R.id.action_search) {
-
 
 			getFragmentManager().beginTransaction()
 					.replace(R.id.container, new SearchFragment())
@@ -299,7 +297,6 @@ public class CmsLoginActivity extends Activity {
 				Bundle savedInstanceState) {
 			View rootView = inflater.inflate(R.layout.fragment_cms_search, container, false);
 
-
 			// EditTextのインスタンスを取得します。
 			kanaET = (EditText) rootView.findViewById(R.id.kanaET);
 
@@ -334,6 +331,24 @@ public class CmsLoginActivity extends Activity {
 						} else if (!"".equals(startDateCriteria) && !"".equals(endDateCriteria)) {
 							Toast.makeText(getActivity(), "期間検索を実行します", Toast.LENGTH_LONG).show();
 
+							List<MemberInformation> list = dao.findByDate(startDateCriteria, endDateCriteria);// 入力された期間と一致するレコードを検索します。
+
+							if (list.size() != 0) {
+								StringBuilder lines = new StringBuilder();
+								for (MemberInformation tmp : list) {
+									lines.append(tmp.get_id());
+									lines.append("|");
+									lines.append(tmp.getName());
+									lines.append("|");
+									lines.append(tmp.getDate());
+									lines.append(System.getProperty("line.separator"));
+								}
+
+								resultTV.setText(lines.toString());
+							} else {
+								resultTV.setText("条件に一致するレコードはありません");
+							}
+
 						}
 
 					} else {// カナ条件が入力されているケースです。
@@ -343,7 +358,26 @@ public class CmsLoginActivity extends Activity {
 
 							List<MemberInformation> list = dao.findByKana(kanaCriteria);// 入力された条件と前方一致するレコードを検索します。
 
+							if (list.size() != 0) {
+								StringBuilder lines = new StringBuilder();
+								for (MemberInformation tmp : list) {
+									lines.append(tmp.get_id());
+									lines.append("|");
+									lines.append(tmp.getName());
+									lines.append("|");
+									lines.append(tmp.getKana());
+									lines.append(System.getProperty("line.separator"));
+								}
 
+								resultTV.setText(lines.toString());
+							} else {
+								resultTV.setText("条件に一致するレコードはありません");
+							}
+
+						} else if (!"".equals(startDateCriteria) && !"".equals(endDateCriteria)) {
+							Toast.makeText(getActivity(), "カナ検索と期間検索を同時に実行します", Toast.LENGTH_LONG).show();
+
+							List<MemberInformation> list = dao.findByKanaDate(kanaCriteria,startDateCriteria, endDateCriteria);// 入力された条件と前方一致し、期間と一致するレコードを検索します。
 
 							if (list.size() != 0) {
 								StringBuilder lines = new StringBuilder();
@@ -362,10 +396,6 @@ public class CmsLoginActivity extends Activity {
 							} else {
 								resultTV.setText("条件に一致するレコードはありません");
 							}
-
-						} else if (!"".equals(startDateCriteria) && !"".equals(endDateCriteria)) {
-							Toast.makeText(getActivity(), "カナ検索と期間検索を同時に実行します", Toast.LENGTH_LONG).show();
-
 						}
 
 					}
