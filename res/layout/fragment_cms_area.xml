@@ -1,0 +1,16 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.cmssample.CmsLoginActivity$PlaceholderFragment" >
+
+    <TextView
+        android:id="@+id/areaTV"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#2f4f4f"
+        android:textColor="#ffffff"
+        android:textSize="14sp" />
+
+</LinearLayout>

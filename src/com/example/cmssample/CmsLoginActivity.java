@@ -40,7 +40,7 @@ public class CmsLoginActivity extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.cms_login, menu);
 
-		menu.findItem(R.id.action_db).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+		menu.findItem(R.id.action_code).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
 		menu.findItem(R.id.action_search).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
 
 		return true;
@@ -54,7 +54,12 @@ public class CmsLoginActivity extends Activity {
 		int id = item.getItemId();
 		if (id == R.id.action_settings) {
 			return true;
-		} else if (id == R.id.action_db) {
+		} else if (id == R.id.action_code) {
+
+			getFragmentManager().beginTransaction()
+					.replace(R.id.container, new AreaCodeFragment())
+					.addToBackStack(null)// バックキーを押下すると一つ前のフラグメントに戻ります。
+					.commit();
 
 			return true;
 		} else if (id == R.id.action_search) {
@@ -377,7 +382,7 @@ public class CmsLoginActivity extends Activity {
 						} else if (!"".equals(startDateCriteria) && !"".equals(endDateCriteria)) {
 							Toast.makeText(getActivity(), "カナ検索と期間検索を同時に実行します", Toast.LENGTH_LONG).show();
 
-							List<MemberInformation> list = dao.findByKanaDate(kanaCriteria,startDateCriteria, endDateCriteria);// 入力された条件と前方一致し、期間と一致するレコードを検索します。
+							List<MemberInformation> list = dao.findByKanaDate(kanaCriteria, startDateCriteria, endDateCriteria);// 入力された条件と前方一致し、期間と一致するレコードを検索します。
 
 							if (list.size() != 0) {
 								StringBuilder lines = new StringBuilder();
@@ -406,6 +411,26 @@ public class CmsLoginActivity extends Activity {
 
 			return rootView;
 		}
+	}
+
+	public static class AreaCodeFragment extends Fragment {
+
+		private TextView areaTV;
+
+		public AreaCodeFragment() {
+		}
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+			View rootView = inflater.inflate(R.layout.fragment_cms_area, container, false);
+
+			areaTV = (TextView) rootView.findViewById(R.id.areaTV);
+			areaTV.setText("テスト");
+
+			return rootView;
+		}
+
 	}
 
 }
