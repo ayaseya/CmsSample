@@ -1,5 +1,7 @@
 package com.example.cmssample;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
@@ -39,6 +41,7 @@ public class CmsLoginActivity extends Activity {
 		getMenuInflater().inflate(R.menu.cms_login, menu);
 
 		menu.findItem(R.id.action_db).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+		menu.findItem(R.id.action_search).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
 
 		return true;
 	}
@@ -52,10 +55,20 @@ public class CmsLoginActivity extends Activity {
 		if (id == R.id.action_settings) {
 			return true;
 		} else if (id == R.id.action_db) {
-			Log.v("CMS", "action_db");
+
+
+			return true;
+		} else if (id == R.id.action_search) {
+
+
+			getFragmentManager().beginTransaction()
+					.replace(R.id.container, new SearchFragment())
+					.addToBackStack(null)// バックキーを押下すると一つ前のフラグメントに戻ります。
+					.commit();
 
 			return true;
 		}
+
 		return super.onOptionsItemSelected(item);
 	}
 
@@ -261,6 +274,104 @@ public class CmsLoginActivity extends Activity {
 					dialog.show();// 編集用のダイアログを表示します。
 
 				}
+			});
+
+			return rootView;
+		}
+	}
+
+	public static class SearchFragment extends Fragment {
+
+		private EditText kanaET;
+		private EditText startDateET;
+		private EditText endDateET;
+
+		private String kanaCriteria;// カナ検索の抽出条件を格納する変数です。
+		private String startDateCriteria;// 期間検索の開始日の指定を格納する変数です。
+		private String endDateCriteria;// 期間検索の終了日の指定を格納する変数です。
+		private TextView resultTV;
+
+		public SearchFragment() {
+		}
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+			View rootView = inflater.inflate(R.layout.fragment_cms_search, container, false);
+
+
+			// EditTextのインスタンスを取得します。
+			kanaET = (EditText) rootView.findViewById(R.id.kanaET);
+
+			startDateET = (EditText) rootView.findViewById(R.id.startDateET);
+			endDateET = (EditText) rootView.findViewById(R.id.endDateET);
+
+			resultTV = (TextView) rootView.findViewById(R.id.resultTV);
+
+			// 検索ボタンのクリックリスナーを設定します。
+			((Button) rootView.findViewById(R.id.searchBtn)).setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					// EditTextに入力された内容を取得します。
+
+					kanaCriteria = kanaET.getText().toString();
+
+					startDateCriteria = startDateET.getText().toString();
+					endDateCriteria = endDateET.getText().toString();
+
+					// SQLiteHelperのコンストラクターを呼び出します。
+					MemberSQLiteOpenHelper dbHelper = new MemberSQLiteOpenHelper(getActivity());
+					SQLiteDatabase db = dbHelper.getReadableDatabase();
+					// Daoクラスのコンストラクターを呼び出します。
+					Dao dao = new Dao(db);
+
+					if ("".equals(kanaCriteria)) {// カナ条件が未入力のケースです。
+
+						if ("".equals(startDateCriteria) || "".equals(endDateCriteria)) {
+							Toast.makeText(getActivity(), "検索条件を入力してください", Toast.LENGTH_LONG).show();
+
+						} else if (!"".equals(startDateCriteria) && !"".equals(endDateCriteria)) {
+							Toast.makeText(getActivity(), "期間検索を実行します", Toast.LENGTH_LONG).show();
+
+						}
+
+					} else {// カナ条件が入力されているケースです。
+
+						if ("".equals(startDateCriteria) || "".equals(endDateCriteria)) {
+							Toast.makeText(getActivity(), "カナ検索を実行します", Toast.LENGTH_LONG).show();
+
+							List<MemberInformation> list = dao.findByKana(kanaCriteria);// 入力された条件と前方一致するレコードを検索します。
+
+
+
+							if (list.size() != 0) {
+								StringBuilder lines = new StringBuilder();
+								for (MemberInformation tmp : list) {
+									lines.append(tmp.get_id());
+									lines.append("|");
+									lines.append(tmp.getName());
+									lines.append("|");
+									lines.append(tmp.getKana());
+									lines.append("|");
+									lines.append(tmp.getDate());
+									lines.append(System.getProperty("line.separator"));
+								}
+
+								resultTV.setText(lines.toString());
+							} else {
+								resultTV.setText("条件に一致するレコードはありません");
+							}
+
+						} else if (!"".equals(startDateCriteria) && !"".equals(endDateCriteria)) {
+							Toast.makeText(getActivity(), "カナ検索と期間検索を同時に実行します", Toast.LENGTH_LONG).show();
+
+						}
+
+					}
+					db.close();
+				}
+
 			});
 
 			return rootView;

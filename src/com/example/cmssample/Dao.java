@@ -89,7 +89,7 @@ public class Dao {
 
 		//		Cursor cursor = db.query(TABLE_NAME, COLUMNS, "_id like ? ", new String[]{_id}, null, null, null,null);
 
-		String sql = "select * from member where _id ='" + _id + "';";
+		String sql = "SELECT * FROM member WHERE _id ='" + _id + "';";
 
 		// 第一引数SQL文、第二引数はSQL文内に埋め込まれた「?」にはめ込むString配列です。
 		//
@@ -110,6 +110,36 @@ public class Dao {
 			return member;
 		}
 		return null;
+	}
+
+	public List<MemberInformation> findByKana(String kana) {
+
+		Log.v("CMS", "検索条件=" + kana);
+		List<MemberInformation> list = new ArrayList<MemberInformation>();
+
+		String sql = "SELECT * FROM member WHERE kana LIKE '" + kana + "%';";
+
+		Log.v("CMS", "SQL文=" + sql);
+
+		// 第一引数SQL文、第二引数はSQL文内に埋め込まれた「?」にはめ込むString配列です。
+		//
+		Cursor cursor = db.rawQuery(sql, null);
+
+		while (cursor.moveToNext()) {
+			MemberInformation member = new MemberInformation();
+			member.set_id(cursor.getString(0));
+			member.setName(cursor.getString(1));
+			member.setKana(cursor.getString(2));
+			member.setAddress(cursor.getString(3));
+			member.setTel(cursor.getString(4));
+			member.setDate(cursor.getString(5));
+			member.setPassword(cursor.getString(6));
+
+			Log.v("CMS", "cursor=" + cursor.getString(1));
+			list.add(member);
+		}
+		cursor.close();
+		return list;
 	}
 
 	public int delete(String _id) {
