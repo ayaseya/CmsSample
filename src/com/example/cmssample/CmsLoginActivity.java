@@ -1,6 +1,7 @@
 package com.example.cmssample;
 
 import java.util.List;
+import java.util.Map;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -14,8 +15,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -416,6 +421,10 @@ public class CmsLoginActivity extends Activity {
 	public static class AreaCodeFragment extends Fragment {
 
 		private TextView areaTV;
+		private StringBuilder lines;
+
+		private List<String> areaList;
+		private Map<String, String> areaMap;
 
 		public AreaCodeFragment() {
 		}
@@ -426,7 +435,107 @@ public class CmsLoginActivity extends Activity {
 			View rootView = inflater.inflate(R.layout.fragment_cms_area, container, false);
 
 			areaTV = (TextView) rootView.findViewById(R.id.areaTV);
-			areaTV.setText("テスト");
+
+			ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item);
+			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+			// SQLiteHelperのコンストラクターを呼び出します。
+			MemberSQLiteOpenHelper dbHelper = new MemberSQLiteOpenHelper(getActivity());
+			SQLiteDatabase db = dbHelper.getReadableDatabase();
+			// Daoクラスのコンストラクターを呼び出します。
+			Dao dao = new Dao(db);
+
+			// 地名コードのマスタから都道府県名を取得します。
+			areaList =dao.importAreaName();
+			areaMap=dao.importCodeMap();
+			db.close();
+
+			// アイテムを追加します
+			adapter.add("一覧");
+
+			// 取得した地名をアダプターに追加します。
+			for(int i=0;i<areaList.size();i++){
+				adapter.add(areaList.get(i));
+			}
+
+
+
+			Spinner spinner = (Spinner) rootView.findViewById(R.id.areaSpinner);
+			// アダプターを設定します
+			spinner.setAdapter(adapter);
+
+			spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+				@Override
+				public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+					Spinner spinner = (Spinner) parent;
+					// 選択されたアイテムを取得します
+					String item = (String) spinner.getSelectedItem();
+
+					// SQLiteHelperのコンストラクターを呼び出します。
+					MemberSQLiteOpenHelper dbHelper = new MemberSQLiteOpenHelper(getActivity());
+					SQLiteDatabase db = dbHelper.getReadableDatabase();
+					// Daoクラスのコンストラクターを呼び出します。
+					Dao dao = new Dao(db);
+
+					if ("一覧".equals(item)) {
+						List<MemberInformation> list = dao.findAllJoin();// 地域コードを地名に置き換えたレコードを取得します。
+						lines = new StringBuilder();
+						for (MemberInformation tmp : list) {
+							lines.append(tmp.get_id());
+							lines.append("|");
+							lines.append(tmp.getName());
+							lines.append("|");
+							lines.append(tmp.getAddress());
+							lines.append(System.getProperty("line.separator"));
+						}
+					} else {
+						// item="東京"の場合、連想配列のキーが"東京"となり対応する"13"が返ってきます。
+						String code=areaMap.get(item);
+
+						List<MemberInformation> list = dao.findJoinArea(code);// 地名コードを渡して一致する会員情報を返します。
+						lines = new StringBuilder();
+						for (MemberInformation tmp : list) {
+							lines.append(tmp.get_id());
+							lines.append("|");
+							lines.append(tmp.getName());
+							lines.append("|");
+							lines.append(tmp.getAddress());
+							lines.append(System.getProperty("line.separator"));
+						}
+					}
+					areaTV.setText(lines.toString());
+
+					db.close();
+
+				}
+
+				@Override
+				public void onNothingSelected(AdapterView<?> parent) {
+
+				}
+			});
+
+//			// SQLiteHelperのコンストラクターを呼び出します。
+//			MemberSQLiteOpenHelper dbHelper = new MemberSQLiteOpenHelper(getActivity());
+//			SQLiteDatabase db = dbHelper.getReadableDatabase();
+//			// Daoクラスのコンストラクターを呼び出します。
+//			Dao dao = new Dao(db);
+//
+//			List<MemberInformation> list = dao.findAllJoin();// 地域コードを地名に置き換えたレコードを取得します。
+//
+//			db.close();
+//			lines = new StringBuilder();
+//			for (MemberInformation tmp : list) {
+//				lines.append(tmp.get_id());
+//				lines.append("|");
+//				lines.append(tmp.getName());
+//				lines.append("|");
+//				lines.append(tmp.getAddress());
+//				lines.append(System.getProperty("line.separator"));
+//			}
+//
+//			areaTV.setText(lines.toString());
 
 			return rootView;
 		}

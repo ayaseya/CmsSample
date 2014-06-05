@@ -1,7 +1,9 @@
 package com.example.cmssample;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -202,6 +204,106 @@ public class Dao {
 		return list;
 	}
 
+	public List<MemberInformation> findAllJoin() {
+
+		List<MemberInformation> list = new ArrayList<MemberInformation>();
+
+		// 副問い合わせ（サブクエリー）で条件を抽出したケース
+		String sql = "SELECT member._id,member.name,member.kana,area_code.area,member.tel,member.date,member.password "
+				+ "FROM member JOIN area_code ON member.address = area_code.code ORDER BY _id;";
+
+		Log.v("CMS", "SQL文=" + sql);
+
+		// 第一引数SQL文、第二引数はSQL文内に埋め込まれた「?」にはめ込むString配列です。
+		//
+		Cursor cursor = db.rawQuery(sql, null);
+
+		while (cursor.moveToNext()) {
+			MemberInformation member = new MemberInformation();
+			member.set_id(cursor.getString(0));
+			member.setName(cursor.getString(1));
+			member.setKana(cursor.getString(2));
+			member.setAddress(cursor.getString(3));
+			member.setTel(cursor.getString(4));
+			member.setDate(cursor.getString(5));
+			member.setPassword(cursor.getString(6));
+
+			Log.v("CMS", "cursor=" + cursor.getString(1));
+			list.add(member);
+		}
+		cursor.close();
+		return list;
+	}
+
+	public List<MemberInformation> findJoinArea(String code) {
+
+		List<MemberInformation> list = new ArrayList<MemberInformation>();
+
+		// 副問い合わせ（サブクエリー）で条件を抽出したケース
+		String sql = "SELECT member._id,member.name,member.kana,area_code.area,member.tel,member.date,member.password "
+				+ "FROM member JOIN area_code ON member.address = area_code.code "
+				+ "WHERE address = '" + code + "' "
+				+ "ORDER BY _id;";
+
+		Log.v("CMS", "SQL文=" + sql);
+
+		// 第一引数SQL文、第二引数はSQL文内に埋め込まれた「?」にはめ込むString配列です。
+		//
+		Cursor cursor = db.rawQuery(sql, null);
+
+		while (cursor.moveToNext()) {
+			MemberInformation member = new MemberInformation();
+			member.set_id(cursor.getString(0));
+			member.setName(cursor.getString(1));
+			member.setKana(cursor.getString(2));
+			member.setAddress(cursor.getString(3));
+			member.setTel(cursor.getString(4));
+			member.setDate(cursor.getString(5));
+			member.setPassword(cursor.getString(6));
+
+			Log.v("CMS", "cursor=" + cursor.getString(1));
+			list.add(member);
+		}
+		cursor.close();
+		return list;
+	}
+
+	public List<String> importAreaName() {
+
+		List<String> list = new ArrayList<String>();
+
+		String sql = "SELECT * FROM area_code;";
+
+		Log.v("CMS", "SQL文=" + sql);
+
+		// 第一引数SQL文、第二引数はSQL文内に埋め込まれた「?」にはめ込むString配列です。
+		//
+		Cursor cursor = db.rawQuery(sql, null);
+
+		while (cursor.moveToNext()) {
+			list.add(cursor.getString(1));
+		}
+		cursor.close();
+		return list;
+	}
+	public Map<String, String> importCodeMap() {
+		Map<String, String> map =new HashMap<String, String>();
+
+		String sql = "SELECT * FROM area_code;";
+
+		Log.v("CMS", "SQL文=" + sql);
+
+		// 第一引数SQL文、第二引数はSQL文内に埋め込まれた「?」にはめ込むString配列です。
+		//
+		Cursor cursor = db.rawQuery(sql, null);
+
+		while (cursor.moveToNext()) {
+			map.put(cursor.getString(1), cursor.getString(0));
+
+		}
+		cursor.close();
+		return map;
+	}
 	public int delete(String _id) {
 		return db.delete(TABLE_NAME, " _id = '" + _id + "'", null);
 	}

@@ -5,6 +5,11 @@
     android:orientation="vertical"
     tools:context="com.example.cmssample.CmsLoginActivity$PlaceholderFragment" >
 
+    <Spinner
+        android:id="@+id/areaSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <TextView
         android:id="@+id/areaTV"
         android:layout_width="match_parent"
